@@ -1,8 +1,12 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 
-\title{Documentación Turismo App}
+\title{Informe Turismo App}
 \date{Abril 2018}
+\author{Aguilera, Mayerlin C.I: 24.290.965,\\
+        Castañeda, Jhosevic C.I: 26.960.725, \\
+        Mendoza, Víctor C.I: 21.476.548, \\
+        Mota, Sergio C.I: 21.098.290}
 
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -141,6 +145,80 @@ private static PreparedStatement setPreparedStatementValues(
 \subsection{Uso}
 Cada clase, puede manejarse de forma independiente. Cada una sólo depende de la clase "model", por lo tanto, pueden importarse y usarse según sean necesarias.
 En la clase principal, Turismo, se manejan el login y el registro del usuario, así como las distintas intervenciones del usuario (ya sea cliente o administrador) con el sistema. 
+
+
+\section{SQL}
+\subsection{Dominios}
+Para manejar los distintos tipos de datos, se usan los siguientes dominios:
+\begin{lstlisting}
+CREATE DOMAIN estado_civil
+  as VARCHAR(20)
+  CHECK (VALUE IN ('Soltero','Casado','Viudo'));
+\end{lstlisting}
+El cual se usa para comprobar que un usuario tenga un estado civil permitido por el sistema. Aunqeu se use en su forma "masculina", también se refiere al estado civil de clientes femeninos.
+
+\begin{lstlisting}
+CREATE DOMAIN tipo_ruta
+  as VARCHAR(20)
+  CHECK (VALUE IN ('Avión','Barco','Taxi'));
+\end{lstlisting}
+Se encarga de validar que el tipo de ruta creada, sea válida para el sistema. Pudiendo ingresar sólo esos tipos de transporte.
+
+\begin{lstlisting}
+CREATE DOMAIN tipo_posada
+  as VARCHAR(10)
+  CHECK (VALUE IN ('Apartamento','Casa'));
+\end{lstlisting}
+Sirve para garantizar que el tipo de posada (un tipo de hospedaje), sea del tipo válido, ya que sólo se permiten apartamentos y casas.
+\subsection{Tablas}
+Se usan las siguientes tablas:
+\begin{enumerate}
+    \item Galería
+    \item Comercio
+    \item Sitios\textunderscore F
+    \item Informacion
+    \item Historias
+    \item Edo
+    \item Contacto\textunderscore Ruta
+    \item Contacto\textunderscore Hospedaje
+    \item Requerimientos
+    \item Opinion
+    \item Familia\textunderscore C
+    \item Familia\textunderscore P
+    \item Cliente
+    \item Proveedor
+    \item Destino\textunderscore Turistico
+    \item Plan\textunderscore Transporte
+    \item Ruta
+    \item Programa
+    \item Hospedaje
+    \item Campamento
+    \item Posada
+    \item Residencia
+    \item Hotel
+    \item tiene
+    \item Contrata
+    \item Compra
+    \item Reserva
+    \item Tipo
+    \item Es
+    \item Es\textunderscore una
+    \item De
+\end{enumerate}
+
+\subsection{Permisos}
+Se tienen dos usuarios: cliente\textunderscore turismo y admin\textunderscore turismo. Cada uno tiene ciertos privilegios de lectura y escritura sobre las distintas tablas de la base de dados
+\paragraph{cliente\textunderscore turimo}\mbox{}\\
+Sólo se le permite la operación de "selección" en las tablas
+\begin{enumerate}
+    \item cliente
+    \item posada
+    \item hotel
+    \item campamento
+    \item residencia
+    \item hospedaje
+\end{enumerate}
+Asimismo, se le permite la operación e inserción sólo en la tabla de clientes.
 
 \end{document}
 
