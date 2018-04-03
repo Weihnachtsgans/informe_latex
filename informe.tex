@@ -1,0 +1,146 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Documentación Turismo App}
+\date{Abril 2018}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{imakeidx}
+\usepackage{listings}
+\usepackage{enumitem}
+
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+\makeindex
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Java}
+El archivo principal de la aplicación, es "turismo", a su vez, se divide en múltiples clases, donde cada una será explicada con más detalle a continuación.
+
+\subsection{Clases}
+    \subsubsection{Model}
+        Es la clase principal. Todas las demás clases que tienen que interactuar con la base de datos, extienden ésta clase. Tiene dos functiones principales
+        \begin{lstlisting}[language=Java]
+public static ResultSet executeSelectQuery(String SQL,
+    List<Object> parameters,
+    Connection conn) throws SQLException{
+        int index = 1;
+        PreparedStatement stmt = conn.prepareStatement(SQL);
+        stmt = setPreparedStatementValues(parameters, index, stmt);
+        return stmt.executeQuery();
+}
+        \end{lstlisting}
+        La cual ejecuta una operación de "select" en la base de datos. Recibe una lista de "Objetos" (tipo genérico), una conexión y la query como tal.
+        Luego de ejecutar la query, retorna su "ResultSet".
+        
+        Ahora, la función que se encarga del resto de las operaciones de acceso a la base de datos es la siguiente.
+        \begin{lstlisting}
+public static Boolean executePostQuery(String SQL,
+    List<Object> parameters,
+    Connection conn) throws SQLException{
+        int index = 1;
+        PreparedStatement stmt = conn.prepareStatement(SQL);
+        stmt = setPreparedStatementValues(parameters, index, stmt);
+        return stmt.executeUpdate() > 0;
+}
+        \end{lstlisting}
+        Recibe los mismos parámetros que la otra función, la diferencia es que en ésta se retorna un booleano, simbolizando que se hicieron cambios en la base de datos o no.
+        
+        Ambas funciones, llaman a ésta función.
+        \begin{lstlisting}[language=Java]
+private static PreparedStatement setPreparedStatementValues(
+    List<Object> parameters,
+    int index,
+    PreparedStatement stmt) throws SQLException {
+        for(Object ob: parameters){
+            if(ob.getClass() == String.class){
+                stmt.setString(index,(String)ob);
+            }
+            else if(ob.getClass() == int.class){
+                stmt.setInt(index,(int)ob);
+            }
+            else if(ob.getClass() == Integer.class){
+                stmt.setInt(index,(Integer)ob);
+            }
+            else if(ob.getClass() == Boolean.class){
+                stmt.setBoolean(index,(Boolean)ob);
+            }
+            else if(ob.getClass() == float.class){
+                stmt.setFloat(index,(float)ob);
+            }
+            else if(ob.getClass() == java.sql.Date.class){
+                Date temp = (Date)ob;
+                java.sql.Date t = new java.sql.Date(temp.getTime());
+                stmt.setDate(index,t);
+            }
+            else if(ob.getClass() == java.util.Date.class){
+                Date temp = (Date)ob;
+                java.sql.Date t = new java.sql.Date(temp.getTime());
+                stmt.setDate(index,t);
+            }
+            index++;
+        }
+        return stmt;
+}
+        \end{lstlisting}
+        La cual se encarga re recibir todos los parámetros y construir un "Prepared Statement" válido con todos ellos. La razón de usar "Prepared Statements" y no usar un formateo de Strings solamente, es para evitar inyecciones SQL.
+    \subsubsection{Similitudes entre todas las clases}
+        Todas las clases cuentan con los siguientes métodos
+        \begin{enumerate}
+            \item Constructor
+            \item Asignadores
+            \item Find
+            \item Save
+        \end{enumerate}
+        \paragraph{Constructores}\mbox{}\\
+        Los constructores, como su nombre indica, se encargan de construir un nuevo objeto del tipo de la clase. La mayoría son públicos, a excepción de uno, que es privado y se llama únicamente cuando se una la función "Find".
+        \paragraph{Asignadores}\mbox{}\\
+        Se usan para asignar valores a los atributos de la clase, ya que todos son privados. Hay ciertos atributos (como por ejemplo, el de determinar si un usuario es administrador) que son privados, y sólo se pueden cambiar mediante contacto directo con la base de datos.
+        \paragraph{Find}\mbox{}\\
+        Es un método estático que retorna un objeto de la clase ya construido, a partir de los datos ya sumistrados. Si no se encuentra el elemento deseado en la bse de datos, se arroja una excepción que deberá ser manejada por el proceso principal.
+        \paragraph{Save}\mbox{}\\
+        Esta función se encarga de guardar (o actualizar) los datos actuales en la base de datos. Para determinar si hay que actualizar o insertar, se usa el valor que posee un atributo general en todas las clases: "isNew", el cual de determina si una clase fué creada usando el método "find" o manualmente.
+        
+    \subsubsection{Clases principales}
+        Se manejan las siguientes clases para la aplicación.
+        \begin{enumerate}
+            \item Usuario
+            \begin{enumerate}
+                \item cliente
+                \item proveedor
+            \end{enumerate}
+            \item transporte
+            \begin{enumerate}
+                \item ruta
+            \end{enumerate}
+            \item hospedaje
+            \begin{enumerate}
+                \item Campamento
+                \item Hospedaje
+                \item Posada
+                \item Residencia
+            \end{enumerate}
+        \end{enumerate}
+        \paragraph{cliente}\mbox{}\\
+        Maneja todas las interacciones con la table "clientes" de la base de datos. Permite crear un cliente, así como buscar uno nuevo. Actualmente, al ingresar o registrarse, se hará como cliente
+        \paragraph{proveedor}\mbox{}\\
+        Permite interactuar con todos los elementos de la base de datos que tengan que ver con la tabla de proveedor. 
+        \paragraph{Transporte}\mbox{}\\
+        En esta sección, se maneja todo lo relacionado con las rutas. Actualmente, se permite la interacción total con la tabla de rutas de la base de datos.
+        \paragraph{Hospedaje}\mbox{}\\
+        En esta sección se manejan las interacciones con los distintos hospedajes disponibles, cada clase, hace alución al tipo de hospedaje con el que interviene.
+        
+        
+\subsection{Uso}
+Cada clase, puede manejarse de forma independiente. Cada una sólo depende de la clase "model", por lo tanto, pueden importarse y usarse según sean necesarias.
+En la clase principal, Turismo, se manejan el login y el registro del usuario, así como las distintas intervenciones del usuario (ya sea cliente o administrador) con el sistema. 
+
+\end{document}
+
